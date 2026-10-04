@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, RotateCcw, Flag, ArrowRight } from 'lucide-react';
+import { Play, Pause, RotateCcw, Flag } from 'lucide-react';
 
 export default function StopwatchControls({
   isRunning,
@@ -10,7 +10,6 @@ export default function StopwatchControls({
   onReset,
   onRecordLap,
   lapCount = 0,
-  onViewLaps,
 }) {
   return (
     <div className="stopwatch-controls-module" role="group" aria-label="Stopwatch controls">
@@ -62,23 +61,6 @@ export default function StopwatchControls({
         >
           <RotateCcw size={16} />
           <span>RESET</span>
-        </button>
-      </div>
-
-      {/* Lap Screen Access CTA */}
-      <div className="controls-laps-link-wrapper">
-        <button
-          type="button"
-          className="btn-view-laps-link"
-          onClick={onViewLaps}
-          aria-label="Navigate to laps and statistics screen"
-        >
-          <span>
-            {lapCount > 0
-              ? `${lapCount} ${lapCount === 1 ? 'LAP' : 'LAPS'} RECORDED`
-              : 'NO LAPS YET'}
-          </span>
-          <ArrowRight size={14} className="link-arrow" />
         </button>
       </div>
     </div>

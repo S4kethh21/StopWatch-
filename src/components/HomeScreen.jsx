@@ -2,7 +2,7 @@ import React from 'react';
 import StopwatchIllustration from './StopwatchIllustration';
 import { ArrowRight } from 'lucide-react';
 
-export default function HomeScreen({ onStartStopwatch }) {
+export default function HomeScreen({ onNavigateStopwatch }) {
   return (
     <div className="screen-container home-screen-view">
       {/* Editorial Top Bar */}
@@ -18,10 +18,9 @@ export default function HomeScreen({ onStartStopwatch }) {
         </div>
       </header>
 
-      {/* Main Hero Grid: Typography on Left, Minimalist Dial Graphic on Right */}
+      {/* Main Hero: Left Editorial Typography, Right Precision Illustration */}
       <main className="home-main-content">
         <div className="home-left-col">
-          {/* Hero Typography */}
           <h1 className="home-hero-headline">
             <span className="text-yellow">Measure</span>
             <br />
@@ -36,13 +35,13 @@ export default function HomeScreen({ onStartStopwatch }) {
             time, laps and performance.
           </p>
 
-          {/* Primary CTA */}
+          {/* Primary CTA (Navigates to Stopwatch without auto-starting) */}
           <div className="home-cta-wrap">
             <button
               type="button"
               className="btn-hero-cta"
-              onClick={onStartStopwatch}
-              aria-label="Start stopwatch and open timer screen"
+              onClick={onNavigateStopwatch}
+              aria-label="Open stopwatch screen"
             >
               <span>START STOPWATCH</span>
               <ArrowRight size={18} className="cta-arrow" />
@@ -64,7 +63,7 @@ export default function HomeScreen({ onStartStopwatch }) {
       <footer className="screen-footer home-footer">
         <span className="footer-edition">EDITION 02 / 2026</span>
         <span className="footer-shortcuts-hint">
-          PRESS <kbd>SPACE</kbd> TO QUICK-LAUNCH STOPWATCH
+          PRESS <kbd>ENTER</kbd> TO OPEN STOPWATCH
         </span>
       </footer>
     </div>

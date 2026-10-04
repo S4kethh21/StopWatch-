@@ -1,6 +1,7 @@
 import React from 'react';
 import StopwatchDisplay from './StopwatchDisplay';
 import StopwatchControls from './StopwatchControls';
+import LapHistoryPanel from './LapHistoryPanel';
 import { ArrowLeft } from 'lucide-react';
 
 export default function StopwatchScreen({
@@ -13,12 +14,12 @@ export default function StopwatchScreen({
   onPause,
   onReset,
   onRecordLap,
+  onClearLaps,
   onNavigateHome,
-  onNavigateLaps,
 }) {
   return (
     <div className="screen-container stopwatch-screen-view">
-      {/* Top Editorial Bar */}
+      {/* Top Editorial Navigation */}
       <header className="screen-header stopwatch-header" role="banner">
         <button
           type="button"
@@ -40,34 +41,44 @@ export default function StopwatchScreen({
         </div>
       </header>
 
-      {/* Main Stopwatch Stage (Centered in Viewport) */}
+      {/* Main Grid: Left Stopwatch (60-65%), Right Lap History (35-40%) */}
       <main className="stopwatch-main-stage">
-        <div className="stopwatch-center-column">
-          <StopwatchDisplay
-            elapsedTime={elapsedTime}
-            isRunning={isRunning}
-            isPaused={isPaused}
-          />
+        <div className="stopwatch-two-column-layout">
+          {/* Left Column — The Hero Stopwatch */}
+          <section className="stopwatch-hero-col" aria-label="Stopwatch Timer">
+            <StopwatchDisplay
+              elapsedTime={elapsedTime}
+              isRunning={isRunning}
+              isPaused={isPaused}
+            />
 
-          <StopwatchControls
-            isRunning={isRunning}
-            isPaused={isPaused}
-            canReset={canReset}
-            onStart={onStart}
-            onPause={onPause}
-            onReset={onReset}
-            onRecordLap={onRecordLap}
-            lapCount={laps.length}
-            onViewLaps={onNavigateLaps}
-          />
+            <StopwatchControls
+              isRunning={isRunning}
+              isPaused={isPaused}
+              canReset={canReset}
+              onStart={onStart}
+              onPause={onPause}
+              onReset={onReset}
+              onRecordLap={onRecordLap}
+              lapCount={laps.length}
+            />
+          </section>
+
+          {/* Right Column — Lap History Panel */}
+          <section className="stopwatch-sidebar-col" aria-label="Lap History Panel">
+            <LapHistoryPanel
+              laps={laps}
+              onClearLaps={onClearLaps}
+            />
+          </section>
         </div>
       </main>
 
-      {/* Subtle Keyboard Shortcuts Hint */}
+      {/* Subtle Keyboard Shortcuts Footer */}
       <footer className="screen-footer stopwatch-footer">
         <div className="shortcuts-row">
           <span className="shortcut-tag">
-            <kbd>SPACE</kbd> {isRunning ? 'PAUSE' : 'START'}
+            <kbd>SPACE</kbd> {isRunning ? 'PAUSE' : (isPaused ? 'RESUME' : 'START')}
           </span>
           <span className="shortcut-divider">&bull;</span>
           <span className="shortcut-tag">
@@ -76,6 +87,10 @@ export default function StopwatchScreen({
           <span className="shortcut-divider">&bull;</span>
           <span className="shortcut-tag">
             <kbd>R</kbd> RESET
+          </span>
+          <span className="shortcut-divider">&bull;</span>
+          <span className="shortcut-tag">
+            <kbd>ESC</kbd> HOME
           </span>
         </div>
       </footer>

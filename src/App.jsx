@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import HomeScreen from './components/HomeScreen';
 import StopwatchScreen from './components/StopwatchScreen';
-import LapsScreen from './components/LapsScreen';
 import ResetConfirmation from './components/ResetConfirmation';
 
 export default function App() {
-  // Screen-by-Screen Navigation state: 'home' | 'stopwatch' | 'laps'
+  // Screen Navigation state: 'home' | 'stopwatch'
   const [currentScreen, setCurrentScreen] = useState('home');
 
   // Core Stopwatch state
@@ -95,7 +94,7 @@ export default function App() {
     setIsRunning(false);
   }, []);
 
-  // RECORD LAP
+  // RECORD LAP (Updates right-side history immediately)
   const handleRecordLap = useCallback(() => {
     if (!isRunningRef.current) return;
 
@@ -147,28 +146,17 @@ export default function App() {
     setLaps([]);
   }, []);
 
-  // Navigation handlers
+  // Screen Navigation handlers
   const handleNavigateHome = useCallback(() => {
     setCurrentScreen('home');
   }, []);
 
+  // NAVIGATE TO STOPWATCH (DOES NOT START THE TIMER!)
   const handleNavigateStopwatch = useCallback(() => {
     setCurrentScreen('stopwatch');
   }, []);
 
-  const handleNavigateLaps = useCallback(() => {
-    setCurrentScreen('laps');
-  }, []);
-
-  // Transition from Home CTA: switch to stopwatch screen and activate timer
-  const handleStartFromHome = useCallback(() => {
-    setCurrentScreen('stopwatch');
-    if (!isRunningRef.current) {
-      handleStart();
-    }
-  }, [handleStart]);
-
-  // Global Keyboard Shortcuts
+  // Keyboard Shortcuts Handler
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Don't intercept shortcuts when confirmation modal is open
@@ -185,32 +173,49 @@ export default function App() {
         return;
       }
 
-      if (e.code === 'Space') {
-        e.preventDefault();
+      // 1. ENTER KEY: On Home screen, navigates to Stopwatch ONLY (never starts timer)
+      if (e.key === 'Enter') {
         if (currentScreenRef.current === 'home') {
-          handleStartFromHome();
-        } else {
+          e.preventDefault();
+          handleNavigateStopwatch();
+        }
+        return;
+      }
+
+      // 2. SPACE KEY: On Stopwatch screen, Start / Pause toggle
+      if (e.code === 'Space') {
+        if (currentScreenRef.current === 'stopwatch') {
+          e.preventDefault();
           if (isRunningRef.current) {
             handlePause();
           } else {
             handleStart();
           }
         }
-      } else if (e.key === 'l' || e.key === 'L') {
-        if (isRunningRef.current) {
+        return;
+      }
+
+      // 3. L KEY: Record Lap (Stopwatch screen while running)
+      if (e.key === 'l' || e.key === 'L') {
+        if (currentScreenRef.current === 'stopwatch' && isRunningRef.current) {
           e.preventDefault();
           handleRecordLap();
         }
-      } else if (e.key === 'r' || e.key === 'R') {
+        return;
+      }
+
+      // 4. R KEY: Reset stopwatch
+      if (e.key === 'r' || e.key === 'R') {
         if (currentScreenRef.current === 'stopwatch') {
           e.preventDefault();
           handleResetClick();
         }
-      } else if (e.key === 'Escape') {
-        if (currentScreenRef.current === 'laps') {
-          e.preventDefault();
-          handleNavigateStopwatch();
-        } else if (currentScreenRef.current === 'stopwatch' && !isRunningRef.current) {
+        return;
+      }
+
+      // 5. ESCAPE KEY: Return to Home (when timer stopped)
+      if (e.key === 'Escape') {
+        if (currentScreenRef.current === 'stopwatch' && !isRunningRef.current) {
           e.preventDefault();
           handleNavigateHome();
         }
@@ -220,12 +225,11 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
-    handleStartFromHome,
+    handleNavigateStopwatch,
     handleStart,
     handlePause,
     handleRecordLap,
     handleResetClick,
-    handleNavigateStopwatch,
     handleNavigateHome,
   ]);
 
@@ -234,7 +238,7 @@ export default function App() {
       {/* Screen Router Viewport */}
       <div className={`screen-view-framer view-${currentScreen}`}>
         {currentScreen === 'home' && (
-          <HomeScreen onStartStopwatch={handleStartFromHome} />
+          <HomeScreen onNavigateStopwatch={handleNavigateStopwatch} />
         )}
 
         {currentScreen === 'stopwatch' && (
@@ -248,17 +252,8 @@ export default function App() {
             onPause={handlePause}
             onReset={handleResetClick}
             onRecordLap={handleRecordLap}
-            onNavigateHome={handleNavigateHome}
-            onNavigateLaps={handleNavigateLaps}
-          />
-        )}
-
-        {currentScreen === 'laps' && (
-          <LapsScreen
-            laps={laps}
-            elapsedTime={elapsedTime}
             onClearLaps={handleClearLaps}
-            onNavigateStopwatch={handleNavigateStopwatch}
+            onNavigateHome={handleNavigateHome}
           />
         )}
       </div>

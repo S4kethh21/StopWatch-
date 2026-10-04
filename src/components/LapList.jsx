@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Trash2, Timer, Zap, Award, Clock } from 'lucide-react';
+import { Trash2, Zap, Clock } from 'lucide-react';
 import { formatTime } from '../utils/formatTime';
 
 export default function LapList({ laps, onClearLaps }) {
@@ -39,116 +39,102 @@ export default function LapList({ laps, onClearLaps }) {
   const hasLaps = laps && laps.length > 0;
 
   return (
-    <div className="lap-panel" aria-label="Lap history">
-      {/* Panel Header */}
-      <div className="lap-panel-header">
-        <div className="lap-panel-title-group">
-          <Clock size={16} className="lap-header-icon" />
-          <h2 className="lap-panel-title">LAPS</h2>
+    <section className="editorial-laps-section" id="lap-history-section" aria-label="Lap History">
+      <div className="laps-container">
+        {/* Section Header */}
+        <div className="laps-header">
+          <div className="laps-title-wrap">
+            <h3 className="laps-title">LAPS</h3>
+            {hasLaps && <span className="laps-counter">{laps.length}</span>}
+          </div>
+
           {hasLaps && (
-            <span className="lap-count-tag" aria-label={`${laps.length} total laps`}>
-              {laps.length}
-            </span>
+            <button
+              type="button"
+              className="btn-clear-laps-editorial"
+              onClick={onClearLaps}
+              aria-label="Clear all recorded laps"
+            >
+              <Trash2 size={12} />
+              <span>CLEAR LAPS</span>
+            </button>
           )}
         </div>
 
-        {/* Clear Laps Action */}
-        {hasLaps && (
-          <button
-            type="button"
-            className="btn-clear-laps"
-            onClick={onClearLaps}
-            aria-label="Clear lap history"
-          >
-            <Trash2 size={13} />
-            <span>CLEAR LAPS</span>
-          </button>
-        )}
-      </div>
-
-      {/* Lap Table or Empty State */}
-      <div className="lap-table-wrapper">
+        {/* Laps List / Table */}
         {hasLaps ? (
-          <div className="lap-table-container">
-            <table className="lap-table">
-              <thead>
-                <tr>
-                  <th scope="col" className="col-num">#</th>
-                  <th scope="col" className="col-lap-time">LAP TIME</th>
-                  <th scope="col" className="col-total-time">TOTAL TIME</th>
-                </tr>
-              </thead>
-              <tbody>
-                {laps.map((lap) => {
-                  const isFastest = hasComparison && lap.id === fastestLap?.id;
-                  const isSlowest = hasComparison && lap.id === slowestLap?.id;
+          <div className="laps-table-wrapper">
+            <div className="laps-table-header">
+              <span className="col-th col-id">#</span>
+              <span className="col-th col-lap">LAP TIME</span>
+              <span className="col-th col-total">TOTAL TIME</span>
+            </div>
 
-                  let rowModifier = '';
-                  if (isFastest) rowModifier = 'row-fastest';
-                  else if (isSlowest) rowModifier = 'row-slowest';
+            <div className="laps-rows-list">
+              {laps.map((lap) => {
+                const isFastest = hasComparison && lap.id === fastestLap?.id;
+                const isSlowest = hasComparison && lap.id === slowestLap?.id;
 
-                  return (
-                    <tr key={lap.id} className={`lap-row ${rowModifier}`}>
-                      <td className="col-num">
-                        <span className="lap-index-badge">
-                          {String(lap.lapNumber).padStart(2, '0')}
+                return (
+                  <div
+                    key={lap.id}
+                    className={`lap-row-editorial ${isFastest ? 'is-fastest' : ''} ${
+                      isSlowest ? 'is-slowest' : ''
+                    }`}
+                  >
+                    <div className="row-col col-id">
+                      <span className="lap-num-badge">
+                        LAP {String(lap.lapNumber).padStart(2, '0')}
+                      </span>
+                      {isFastest && (
+                        <span className="lap-pill pill-yellow">
+                          <Zap size={9} /> FASTEST
                         </span>
-                        {isFastest && (
-                          <span className="lap-highlight-tag tag-fastest" title="Fastest Lap">
-                            FASTEST
-                          </span>
-                        )}
-                        {isSlowest && (
-                          <span className="lap-highlight-tag tag-slowest" title="Slowest Lap">
-                            SLOWEST
-                          </span>
-                        )}
-                      </td>
-                      <td className="col-lap-time">
-                        <span className="time-tabular">{formatTime(lap.lapTime)}</span>
-                      </td>
-                      <td className="col-total-time">
-                        <span className="time-tabular text-muted">{formatTime(lap.totalTime)}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      )}
+                      {isSlowest && <span className="lap-pill pill-gray">SLOWEST</span>}
+                    </div>
+
+                    <div className="row-col col-lap">
+                      <span className="lap-time-value">{formatTime(lap.lapTime)}</span>
+                    </div>
+
+                    <div className="row-col col-total">
+                      <span className="total-time-value">{formatTime(lap.totalTime)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Performance Analytics below table */}
+            <div className="laps-summary-footer">
+              <div className="summary-stat-box box-fastest">
+                <span className="summary-label">FASTEST LAP</span>
+                <span className="summary-value text-yellow">
+                  {formatTime(fastestLap.lapTime)}
+                  <span className="summary-sub">#{String(fastestLap.lapNumber).padStart(2, '0')}</span>
+                </span>
+              </div>
+
+              <div className="summary-stat-box box-slowest">
+                <span className="summary-label">SLOWEST LAP</span>
+                <span className="summary-value text-white">
+                  {formatTime(slowestLap.lapTime)}
+                  <span className="summary-sub">#{String(slowestLap.lapNumber).padStart(2, '0')}</span>
+                </span>
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="lap-empty-state">
-            <Timer size={32} className="empty-icon" strokeWidth={1.5} />
-            <p className="empty-title">No laps recorded yet</p>
-            <p className="empty-subtitle">
-              Press <kbd>L</kbd> or the LAP button while running to log split times.
+          <div className="laps-empty-editorial">
+            <Clock size={28} className="empty-clock-icon" strokeWidth={1.5} />
+            <p className="empty-primary">No laps recorded yet</p>
+            <p className="empty-secondary">
+              Press <kbd>L</kbd> or tap the LAP button while running to record splits.
             </p>
           </div>
         )}
       </div>
-
-      {/* Lap Performance Summary (Fastest / Slowest) */}
-      {hasLaps && (
-        <div className="lap-stats-summary" aria-label="Lap performance statistics">
-          <div className="stat-card stat-fastest">
-            <div className="stat-label-row">
-              <Zap size={14} className="stat-icon text-cyan" />
-              <span className="stat-label">FASTEST</span>
-              <span className="stat-lap-ref">#{String(fastestLap.lapNumber).padStart(2, '0')}</span>
-            </div>
-            <div className="stat-value">{formatTime(fastestLap.lapTime)}</div>
-          </div>
-
-          <div className="stat-card stat-slowest">
-            <div className="stat-label-row">
-              <Award size={14} className="stat-icon text-rose" />
-              <span className="stat-label">SLOWEST</span>
-              <span className="stat-lap-ref">#{String(slowestLap.lapNumber).padStart(2, '0')}</span>
-            </div>
-            <div className="stat-value">{formatTime(slowestLap.lapTime)}</div>
-          </div>
-        </div>
-      )}
-    </div>
+    </section>
   );
 }

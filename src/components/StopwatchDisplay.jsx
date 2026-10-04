@@ -6,86 +6,64 @@ export default function StopwatchDisplay({ elapsedTime, isRunning, isPaused }) {
 
   // Status computation
   let statusText = 'READY';
-  let statusClass = 'status-ready';
+  let statusColorClass = 'status-ready';
 
   if (isRunning) {
     statusText = 'RUNNING';
-    statusClass = 'status-running';
+    statusColorClass = 'status-running';
   } else if (isPaused) {
     statusText = 'PAUSED';
-    statusClass = 'status-paused';
+    statusColorClass = 'status-paused';
   }
 
-  const ringStateClass = isRunning
-    ? 'ring-running'
-    : isPaused
-    ? 'ring-paused'
-    : 'ring-ready';
+  // Determine which time row has active prominence
+  const hasHours = parseInt(hours, 10) > 0;
+  const hasMinutes = parseInt(minutes, 10) > 0;
 
   return (
-    <section className="stopwatch-display-container" aria-label="Stopwatch Timer">
-      {/* Precision Instrument Dial / Ring */}
-      <div className={`dial-wrapper ${ringStateClass}`}>
-        {/* Subtle Ambient Glow Ring */}
-        <div className="dial-glow" aria-hidden="true" />
+    <div className="stopwatch-screen-content" aria-label="Stopwatch Timer">
+      {/* Huge Oversized Typographic Timer (Stacked Editorial Style) */}
+      <div
+        className="editorial-timer-stack"
+        role="timer"
+        aria-live="polite"
+        aria-label={`Current stopwatch time: ${formatted}`}
+      >
+        {/* Hours row */}
+        <div className={`time-digit-row row-hours ${hasHours ? 'row-active' : 'row-dim'}`}>
+          <span className="digit-value">{hours}</span>
+          <span className="digit-unit">h</span>
+        </div>
 
-        {/* SVG Decorative Precision Ticks & Ring */}
-        <svg className="dial-svg" viewBox="0 0 360 360" aria-hidden="true">
-          <circle
-            className="dial-track"
-            cx="180"
-            cy="180"
-            r="168"
-          />
-          <circle
-            className="dial-progress"
-            cx="180"
-            cy="180"
-            r="168"
-            strokeDasharray="1055"
-            strokeDashoffset="0"
-          />
-        </svg>
+        {/* Minutes row */}
+        <div className={`time-digit-row row-minutes ${hasMinutes ? 'row-active' : (hasHours ? 'row-dim' : '')}`}>
+          <span className="digit-value">{minutes}</span>
+          <span className="digit-unit">m</span>
+        </div>
 
-        {/* Stopwatch Content inside dial */}
-        <div className="display-inner">
-          {/* Main Large Time Readout */}
-          <div
-            className="time-readout"
-            role="timer"
-            aria-live="polite"
-            aria-label={`Elapsed time: ${formatted}`}
-          >
-            <span className="time-segment hours">{hours}</span>
-            <span className="time-separator">:</span>
-            <span className="time-segment minutes">{minutes}</span>
-            <span className="time-separator">:</span>
-            <span className="time-segment seconds">{seconds}</span>
-            <span className="time-dot">.</span>
-            <span className="time-segment centiseconds">{centiseconds}</span>
-          </div>
+        {/* Seconds row — Primary focal digit */}
+        <div className={`time-digit-row row-seconds ${isRunning ? 'row-highlight-yellow' : ''}`}>
+          <span className="digit-value">{seconds}</span>
+          <span className="digit-unit">s</span>
+        </div>
 
-          {/* Time Unit Labels for high readability */}
-          <div className="time-labels" aria-hidden="true">
-            <span className="unit-label">HR</span>
-            <span className="unit-spacer" />
-            <span className="unit-label">MIN</span>
-            <span className="unit-spacer" />
-            <span className="unit-label">SEC</span>
-            <span className="unit-spacer dot-spacer" />
-            <span className="unit-label cs-label">CS</span>
-          </div>
-
-          {/* Status Indicator */}
-          <div className={`status-pill ${statusClass}`} role="status">
-            <span className="status-dot-wrapper" aria-hidden="true">
-              <span className="status-dot-ping" />
-              <span className="status-dot-core" />
-            </span>
-            <span className="status-text">{statusText}</span>
-          </div>
+        {/* Centiseconds fractional readout */}
+        <div className="time-centiseconds-row" aria-hidden="true">
+          <span className="cs-label">SPLIT</span>
+          <span className={`cs-value ${isRunning ? 'text-yellow' : 'text-muted'}`}>
+            .{centiseconds}
+          </span>
         </div>
       </div>
-    </section>
+
+      {/* Thin Editorial Divider */}
+      <div className="editorial-divider" aria-hidden="true" />
+
+      {/* Status Label */}
+      <div className={`editorial-status ${statusColorClass}`} role="status">
+        <span className="status-indicator-dot" aria-hidden="true" />
+        <span className="status-indicator-text">{statusText}</span>
+      </div>
+    </div>
   );
 }

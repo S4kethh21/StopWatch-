@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Header from './components/Header';
+import PhoneFrame from './components/PhoneFrame';
 import StopwatchDisplay from './components/StopwatchDisplay';
-import Controls from './components/Controls';
-import LapControls from './components/LapControls';
+import StopwatchControls from './components/StopwatchControls';
+import IntroPhone from './components/IntroPhone';
+import ActivePhone from './components/ActivePhone';
 import LapList from './components/LapList';
 import ResetConfirmation from './components/ResetConfirmation';
 import KeyboardHints from './components/KeyboardHints';
@@ -13,12 +15,12 @@ export default function App() {
   const [laps, setLaps] = useState([]);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
 
-  // References for precision timing without state latency
+  // References for timestamp delta calculation
   const startTimeRef = useRef(0);
   const accumulatedTimeRef = useRef(0);
   const animFrameIdRef = useRef(null);
 
-  // Synchronized state references for event handlers
+  // Synchronized state references for event listeners
   const isRunningRef = useRef(false);
   const elapsedTimeRef = useRef(0);
   const lapsRef = useRef([]);
@@ -40,11 +42,11 @@ export default function App() {
     showResetConfirmationRef.current = showResetConfirmation;
   }, [showResetConfirmation]);
 
-  // Derived state
+  // Derived flags
   const isPaused = !isRunning && elapsedTime > 0;
   const canReset = elapsedTime > 0 || laps.length > 0;
 
-  // Cleanup requestAnimationFrame on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (animFrameIdRef.current) {
@@ -53,9 +55,9 @@ export default function App() {
     };
   }, []);
 
-  // START action
+  // START / RESUME
   const handleStart = useCallback(() => {
-    if (isRunningRef.current) return; // Prevent multiple timer loops
+    if (isRunningRef.current) return; // Prevent multiple loops
 
     startTimeRef.current = performance.now();
     setIsRunning(true);
@@ -73,7 +75,7 @@ export default function App() {
     animFrameIdRef.current = requestAnimationFrame(tick);
   }, []);
 
-  // PAUSE action
+  // PAUSE
   const handlePause = useCallback(() => {
     if (!isRunningRef.current) return;
 
@@ -89,7 +91,7 @@ export default function App() {
     setIsRunning(false);
   }, []);
 
-  // LAP action
+  // RECORD LAP
   const handleRecordLap = useCallback(() => {
     if (!isRunningRef.current) return;
 
@@ -109,15 +111,15 @@ export default function App() {
     });
   }, []);
 
-  // RESET action
+  // RESET TRIGGER
   const handleResetClick = useCallback(() => {
     if (elapsedTimeRef.current === 0 && lapsRef.current.length === 0) {
       return;
     }
-    // Prompt confirmation dialog
     setShowResetConfirmation(true);
   }, []);
 
+  // CONFIRM RESET
   const handleConfirmReset = useCallback(() => {
     if (animFrameIdRef.current) {
       cancelAnimationFrame(animFrameIdRef.current);
@@ -131,26 +133,38 @@ export default function App() {
     setShowResetConfirmation(false);
   }, []);
 
+  // CANCEL RESET
   const handleCancelReset = useCallback(() => {
     setShowResetConfirmation(false);
   }, []);
 
+  // CLEAR LAPS ONLY
   const handleClearLaps = useCallback(() => {
     setLaps([]);
   }, []);
 
-  // Keyboard shortcut listener
+  // Scroll actions
+  const scrollToLaps = useCallback(() => {
+    const el = document.getElementById('lap-history-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't intercept shortcuts when reset modal is open
       if (showResetConfirmationRef.current) return;
 
-      // Ignore shortcuts if the user is typing in an input field
-      const targetTag = e.target?.tagName?.toUpperCase();
+      const tag = e.target?.tagName?.toUpperCase();
       if (
-        targetTag === 'INPUT' ||
-        targetTag === 'TEXTAREA' ||
-        targetTag === 'SELECT' ||
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
         e.target?.isContentEditable
       ) {
         return;
@@ -179,54 +193,65 @@ export default function App() {
   }, [handlePause, handleStart, handleRecordLap, handleResetClick]);
 
   return (
-    <div className="pulse-app">
-      {/* Background Ambience Layers */}
-      <div className="bg-gradient-canvas" aria-hidden="true" />
-      <div className="bg-radial-glow bg-radial-blue" aria-hidden="true" />
-      <div className="bg-radial-glow bg-radial-violet" aria-hidden="true" />
-      <div className="bg-grid-overlay" aria-hidden="true" />
+    <div className="editorial-app-root">
+      {/* Editorial Page Container */}
+      <div className="editorial-viewport-wrapper">
+        <Header onScrollToLaps={scrollToLaps} onScrollToTop={scrollToTop} />
 
-      {/* Main Content Layout */}
-      <div className="app-shell">
-        <Header />
-
-        <main className="main-content">
-          <div className="center-stage">
-            {/* Stopwatch Central Display */}
-            <StopwatchDisplay
-              elapsedTime={elapsedTime}
+        <main className="editorial-main-stage">
+          {/* 3-Phone Showcase Hero Composition */}
+          <div className="phones-trio-showcase">
+            {/* Left Phone — Intro / Welcome */}
+            <IntroPhone
+              onStartStopwatch={handleStart}
+              onViewLaps={scrollToLaps}
               isRunning={isRunning}
-              isPaused={isPaused}
             />
 
-            {/* Controls Cluster */}
-            <div className="controls-cluster">
-              <Controls
-                isRunning={isRunning}
-                isPaused={isPaused}
-                canReset={canReset}
-                onStart={handleStart}
-                onPause={handlePause}
-                onReset={handleResetClick}
-              />
-              <LapControls
-                isRunning={isRunning}
-                onRecordLap={handleRecordLap}
-                lapCount={laps.length}
-              />
-            </div>
+            {/* Center Phone — Hero Functional Stopwatch */}
+            <PhoneFrame
+              headerLabel="STOPWATCH"
+              variant="hero-center"
+              className="phone-center-hero"
+            >
+              <div className="center-hero-content">
+                <StopwatchDisplay
+                  elapsedTime={elapsedTime}
+                  isRunning={isRunning}
+                  isPaused={isPaused}
+                />
+                <StopwatchControls
+                  isRunning={isRunning}
+                  isPaused={isPaused}
+                  canReset={canReset}
+                  onStart={handleStart}
+                  onPause={handlePause}
+                  onReset={handleResetClick}
+                  onRecordLap={handleRecordLap}
+                  lapCount={laps.length}
+                />
+              </div>
+            </PhoneFrame>
+
+            {/* Right Phone — Active Lap Times */}
+            <ActivePhone
+              laps={laps}
+              isRunning={isRunning}
+              onPause={handlePause}
+              onStart={handleStart}
+              onRecordLap={handleRecordLap}
+              elapsedTime={elapsedTime}
+            />
           </div>
 
-          {/* Lap History Panel */}
-          <div className="lap-stage">
-            <LapList laps={laps} onClearLaps={handleClearLaps} />
-          </div>
+          {/* Minimalist Laps Section */}
+          <LapList laps={laps} onClearLaps={handleClearLaps} />
         </main>
 
         <KeyboardHints />
       </div>
 
-      {/* Reset Confirmation Dialog */}
+      {/* Inline Reset Confirmation Dialog */}
       <ResetConfirmation
         isOpen={showResetConfirmation}
         onCancel={handleCancelReset}

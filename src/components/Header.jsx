@@ -1,24 +1,40 @@
 import React from 'react';
-import { Activity } from 'lucide-react';
 
-export default function Header() {
+export default function Header({ onScrollToLaps, onScrollToTop }) {
   return (
-    <header className="pulse-header" role="banner">
-      <div className="header-brand">
-        <div className="brand-icon-wrapper" aria-hidden="true">
-          <Activity className="brand-icon" size={20} />
-        </div>
-        <div className="brand-text">
-          <h1 className="brand-title">PULSE</h1>
-          <span className="brand-subtitle">Precision Stopwatch</span>
-        </div>
+    <header className="editorial-header" role="banner">
+      {/* Top Left Label */}
+      <div className="header-meta-left">
+        <span className="header-tag-yellow">STOPWATCH WEB APP</span>
+        <span className="header-subtitle">Internship Task 02</span>
       </div>
 
-      <div className="header-meta">
-        <span className="task-badge" aria-label="Internship Task Two">
-          <span className="badge-bullet" aria-hidden="true"></span>
-          INTERNSHIP &bull; TASK 02
-        </span>
+      {/* Center Minimal Navigation */}
+      <nav className="header-center-nav" aria-label="Main Navigation">
+        <button
+          type="button"
+          className="nav-link"
+          onClick={onScrollToTop}
+          aria-label="Scroll to stopwatch overview"
+        >
+          STOPWATCH
+        </button>
+        <span className="nav-divider" aria-hidden="true">&bull;</span>
+        <button
+          type="button"
+          className="nav-link"
+          onClick={onScrollToLaps}
+          aria-label="Scroll to lap history"
+        >
+          LAPS
+        </button>
+      </nav>
+
+      {/* Top Right Label */}
+      <div className="header-meta-right">
+        <span className="header-tag-yellow">PRECISION</span>
+        <span className="header-subtitle">TIME TRACKING</span>
+        <span className="header-tech-spec" aria-hidden="true">2026 // ED-02</span>
       </div>
     </header>
   );

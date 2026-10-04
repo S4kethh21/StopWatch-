@@ -2,7 +2,7 @@ import React from 'react';
 import StopwatchDisplay from './StopwatchDisplay';
 import StopwatchControls from './StopwatchControls';
 import LapHistoryPanel from './LapHistoryPanel';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 
 export default function StopwatchScreen({
   elapsedTime,
@@ -16,6 +16,7 @@ export default function StopwatchScreen({
   onRecordLap,
   onClearLaps,
   onNavigateHome,
+  onOpenInfo,
 }) {
   return (
     <div className="screen-container stopwatch-screen-view">
@@ -36,8 +37,19 @@ export default function StopwatchScreen({
         </div>
 
         <div className="header-meta-right">
-          <span className="spec-text-yellow">TASK 02</span>
-          <span className="spec-text-muted">PRECISION</span>
+          <div className="header-right-actions">
+            <span className="spec-text-muted header-precision-tag">PRECISION</span>
+            {/* Circular Info Button */}
+            <button
+              type="button"
+              className="btn-info-circle"
+              onClick={onOpenInfo}
+              aria-label="About this stopwatch and developer information"
+              title="About & Information"
+            >
+              <Info size={16} />
+            </button>
+          </div>
         </div>
       </header>
 

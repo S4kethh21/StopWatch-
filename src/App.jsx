@@ -2,10 +2,14 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import HomeScreen from './components/HomeScreen';
 import StopwatchScreen from './components/StopwatchScreen';
 import ResetConfirmation from './components/ResetConfirmation';
+import InfoPanel from './components/InfoPanel';
 
 export default function App() {
   // Screen Navigation state: 'home' | 'stopwatch'
   const [currentScreen, setCurrentScreen] = useState('home');
+
+  // Info Panel state
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   // Core Stopwatch state
   const [isRunning, setIsRunning] = useState(false);
@@ -23,6 +27,7 @@ export default function App() {
   const elapsedTimeRef = useRef(0);
   const lapsRef = useRef([]);
   const showResetConfirmationRef = useRef(false);
+  const isInfoOpenRef = useRef(false);
   const currentScreenRef = useRef('home');
 
   useEffect(() => {
@@ -40,6 +45,10 @@ export default function App() {
   useEffect(() => {
     showResetConfirmationRef.current = showResetConfirmation;
   }, [showResetConfirmation]);
+
+  useEffect(() => {
+    isInfoOpenRef.current = isInfoOpen;
+  }, [isInfoOpen]);
 
   useEffect(() => {
     currentScreenRef.current = currentScreen;
@@ -151,15 +160,33 @@ export default function App() {
     setCurrentScreen('home');
   }, []);
 
-  // NAVIGATE TO STOPWATCH (DOES NOT START THE TIMER!)
+  // NAVIGATE TO STOPWATCH (DOES NOT START TIMER!)
   const handleNavigateStopwatch = useCallback(() => {
     setCurrentScreen('stopwatch');
+  }, []);
+
+  // Info Panel Handlers
+  const handleOpenInfo = useCallback(() => {
+    setIsInfoOpen(true);
+  }, []);
+
+  const handleCloseInfo = useCallback(() => {
+    setIsInfoOpen(false);
   }, []);
 
   // Keyboard Shortcuts Handler
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't intercept shortcuts when confirmation modal is open
+      // If Info panel is open, let InfoPanel handle Escape
+      if (isInfoOpenRef.current) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleCloseInfo();
+        }
+        return;
+      }
+
+      // Don't intercept shortcuts when reset modal is open
       if (showResetConfirmationRef.current) return;
 
       // Ignore shortcuts if typing in input
@@ -231,6 +258,7 @@ export default function App() {
     handleRecordLap,
     handleResetClick,
     handleNavigateHome,
+    handleCloseInfo,
   ]);
 
   return (
@@ -238,7 +266,10 @@ export default function App() {
       {/* Screen Router Viewport */}
       <div className={`screen-view-framer view-${currentScreen}`}>
         {currentScreen === 'home' && (
-          <HomeScreen onNavigateStopwatch={handleNavigateStopwatch} />
+          <HomeScreen
+            onNavigateStopwatch={handleNavigateStopwatch}
+            onOpenInfo={handleOpenInfo}
+          />
         )}
 
         {currentScreen === 'stopwatch' && (
@@ -254,9 +285,16 @@ export default function App() {
             onRecordLap={handleRecordLap}
             onClearLaps={handleClearLaps}
             onNavigateHome={handleNavigateHome}
+            onOpenInfo={handleOpenInfo}
           />
         )}
       </div>
+
+      {/* Info / About Drawer Panel */}
+      <InfoPanel
+        isOpen={isInfoOpen}
+        onClose={handleCloseInfo}
+      />
 
       {/* Inline Reset Confirmation Modal */}
       <ResetConfirmation

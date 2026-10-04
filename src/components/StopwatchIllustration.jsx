@@ -70,7 +70,7 @@ export default function StopwatchIllustration() {
 
         {/* Technical Typography Accent on Dial Face */}
         <text x="150" y="196" fill="#555555" fontSize="8" fontFamily="'Space Grotesk', sans-serif" letterSpacing="2" fontWeight="700" textAnchor="middle">
-          PRECISION &bull; CAL 02
+          PRECISION &bull; CHRONO
         </text>
         <text x="150" y="208" fill="#333333" fontSize="7" fontFamily="'JetBrains Mono', monospace" letterSpacing="1" textAnchor="middle">
           1/100 SEC ACCURACY

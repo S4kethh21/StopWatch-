@@ -1,20 +1,34 @@
 import React from 'react';
 import StopwatchIllustration from './StopwatchIllustration';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Info } from 'lucide-react';
 
-export default function HomeScreen({ onNavigateStopwatch }) {
+export default function HomeScreen({ onNavigateStopwatch, onOpenInfo }) {
   return (
     <div className="screen-container home-screen-view">
       {/* Editorial Top Bar */}
       <header className="screen-header home-header" role="banner">
         <div className="header-meta-left">
           <span className="brand-text-primary">STOPWATCH</span>
-          <span className="brand-text-sub">INTERNSHIP TASK 02</span>
+          <span className="brand-text-sub">PRECISION TIMING</span>
         </div>
 
         <div className="header-meta-right">
-          <span className="spec-text-yellow">PRECISION</span>
-          <span className="spec-text-muted">TIME TRACKING</span>
+          <div className="header-right-actions">
+            <div className="spec-text-block">
+              <span className="spec-text-yellow">PRECISION</span>
+              <span className="spec-text-muted">TIME TRACKING</span>
+            </div>
+            {/* Circular Info Button */}
+            <button
+              type="button"
+              className="btn-info-circle"
+              onClick={onOpenInfo}
+              aria-label="About this stopwatch and developer information"
+              title="About & Information"
+            >
+              <Info size={16} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -59,11 +73,11 @@ export default function HomeScreen({ onNavigateStopwatch }) {
         </div>
       </main>
 
-      {/* Subtle Footer */}
+      {/* Clean Footer without any task numbers */}
       <footer className="screen-footer home-footer">
-        <span className="footer-edition">EDITION 02 / 2026</span>
+        <span className="footer-edition">PRECISION TIME TRACKING</span>
         <span className="footer-shortcuts-hint">
-          PRESS <kbd>ENTER</kbd> TO OPEN STOPWATCH
+          ENTER TO START &bull; PRESS <kbd>ENTER</kbd>
         </span>
       </footer>
     </div>

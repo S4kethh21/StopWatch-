@@ -16,53 +16,45 @@ export default function StopwatchDisplay({ elapsedTime, isRunning, isPaused }) {
     statusColorClass = 'status-paused';
   }
 
-  // Determine which time row has active prominence
-  const hasHours = parseInt(hours, 10) > 0;
-  const hasMinutes = parseInt(minutes, 10) > 0;
-
   return (
-    <div className="stopwatch-screen-content" aria-label="Stopwatch Timer">
-      {/* Huge Oversized Typographic Timer (Stacked Editorial Style) */}
+    <div className="stopwatch-display-unit" aria-label="Stopwatch Timer">
+      <span className="timer-top-label" aria-hidden="true">TIME</span>
+
+      {/* Huge Editorial Typographic Timer */}
       <div
-        className="editorial-timer-stack"
+        className="huge-timer-digits"
         role="timer"
         aria-live="polite"
-        aria-label={`Current stopwatch time: ${formatted}`}
+        aria-label={`Elapsed time: ${formatted}`}
       >
-        {/* Hours row */}
-        <div className={`time-digit-row row-hours ${hasHours ? 'row-active' : 'row-dim'}`}>
-          <span className="digit-value">{hours}</span>
-          <span className="digit-unit">h</span>
-        </div>
-
-        {/* Minutes row */}
-        <div className={`time-digit-row row-minutes ${hasMinutes ? 'row-active' : (hasHours ? 'row-dim' : '')}`}>
-          <span className="digit-value">{minutes}</span>
-          <span className="digit-unit">m</span>
-        </div>
-
-        {/* Seconds row — Primary focal digit */}
-        <div className={`time-digit-row row-seconds ${isRunning ? 'row-highlight-yellow' : ''}`}>
-          <span className="digit-value">{seconds}</span>
-          <span className="digit-unit">s</span>
-        </div>
-
-        {/* Centiseconds fractional readout */}
-        <div className="time-centiseconds-row" aria-hidden="true">
-          <span className="cs-label">SPLIT</span>
-          <span className={`cs-value ${isRunning ? 'text-yellow' : 'text-muted'}`}>
-            .{centiseconds}
-          </span>
-        </div>
+        <span className="digit-group group-hours">{hours}</span>
+        <span className="digit-colon">:</span>
+        <span className="digit-group group-minutes">{minutes}</span>
+        <span className="digit-colon">:</span>
+        <span className={`digit-group group-seconds ${isRunning ? 'highlight-yellow' : ''}`}>
+          {seconds}
+        </span>
+        <span className="digit-period">.</span>
+        <span className={`digit-group group-centiseconds ${isRunning ? 'cs-yellow' : 'cs-muted'}`}>
+          {centiseconds}
+        </span>
       </div>
 
-      {/* Thin Editorial Divider */}
-      <div className="editorial-divider" aria-hidden="true" />
+      {/* Tiny Subtitle Units Underneath */}
+      <div className="timer-unit-labels" aria-hidden="true">
+        <span className="unit-col col-hr">HOURS</span>
+        <span className="unit-space" />
+        <span className="unit-col col-min">MINUTES</span>
+        <span className="unit-space" />
+        <span className="unit-col col-sec">SECONDS</span>
+        <span className="unit-space" />
+        <span className="unit-col col-cs">CENTISECONDS</span>
+      </div>
 
-      {/* Status Label */}
-      <div className={`editorial-status ${statusColorClass}`} role="status">
-        <span className="status-indicator-dot" aria-hidden="true" />
-        <span className="status-indicator-text">{statusText}</span>
+      {/* Status Dot & Label */}
+      <div className={`timer-status-badge ${statusColorClass}`} role="status">
+        <span className="status-dot" aria-hidden="true" />
+        <span className="status-label">{statusText}</span>
       </div>
     </div>
   );

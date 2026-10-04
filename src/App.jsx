@@ -1,30 +1,30 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Header from './components/Header';
-import PhoneFrame from './components/PhoneFrame';
-import StopwatchDisplay from './components/StopwatchDisplay';
-import StopwatchControls from './components/StopwatchControls';
-import IntroPhone from './components/IntroPhone';
-import ActivePhone from './components/ActivePhone';
-import LapList from './components/LapList';
+import HomeScreen from './components/HomeScreen';
+import StopwatchScreen from './components/StopwatchScreen';
+import LapsScreen from './components/LapsScreen';
 import ResetConfirmation from './components/ResetConfirmation';
-import KeyboardHints from './components/KeyboardHints';
 
 export default function App() {
+  // Screen-by-Screen Navigation state: 'home' | 'stopwatch' | 'laps'
+  const [currentScreen, setCurrentScreen] = useState('home');
+
+  // Core Stopwatch state
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [laps, setLaps] = useState([]);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
 
-  // References for timestamp delta calculation
+  // High-precision timing references (avoids state lag & drift)
   const startTimeRef = useRef(0);
   const accumulatedTimeRef = useRef(0);
   const animFrameIdRef = useRef(null);
 
-  // Synchronized state references for event listeners
+  // Synchronized state references for keyboard listeners
   const isRunningRef = useRef(false);
   const elapsedTimeRef = useRef(0);
   const lapsRef = useRef([]);
   const showResetConfirmationRef = useRef(false);
+  const currentScreenRef = useRef('home');
 
   useEffect(() => {
     isRunningRef.current = isRunning;
@@ -42,11 +42,15 @@ export default function App() {
     showResetConfirmationRef.current = showResetConfirmation;
   }, [showResetConfirmation]);
 
+  useEffect(() => {
+    currentScreenRef.current = currentScreen;
+  }, [currentScreen]);
+
   // Derived flags
   const isPaused = !isRunning && elapsedTime > 0;
   const canReset = elapsedTime > 0 || laps.length > 0;
 
-  // Cleanup on unmount
+  // Cleanup requestAnimationFrame on unmount
   useEffect(() => {
     return () => {
       if (animFrameIdRef.current) {
@@ -55,9 +59,9 @@ export default function App() {
     };
   }, []);
 
-  // START / RESUME
+  // START
   const handleStart = useCallback(() => {
-    if (isRunningRef.current) return; // Prevent multiple loops
+    if (isRunningRef.current) return; // Prevent duplicate loops
 
     startTimeRef.current = performance.now();
     setIsRunning(true);
@@ -111,7 +115,7 @@ export default function App() {
     });
   }, []);
 
-  // RESET TRIGGER
+  // TRIGGER RESET
   const handleResetClick = useCallback(() => {
     if (elapsedTimeRef.current === 0 && lapsRef.current.length === 0) {
       return;
@@ -143,23 +147,34 @@ export default function App() {
     setLaps([]);
   }, []);
 
-  // Scroll actions
-  const scrollToLaps = useCallback(() => {
-    const el = document.getElementById('lap-history-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+  // Navigation handlers
+  const handleNavigateHome = useCallback(() => {
+    setCurrentScreen('home');
   }, []);
 
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleNavigateStopwatch = useCallback(() => {
+    setCurrentScreen('stopwatch');
   }, []);
+
+  const handleNavigateLaps = useCallback(() => {
+    setCurrentScreen('laps');
+  }, []);
+
+  // Transition from Home CTA: switch to stopwatch screen and activate timer
+  const handleStartFromHome = useCallback(() => {
+    setCurrentScreen('stopwatch');
+    if (!isRunningRef.current) {
+      handleStart();
+    }
+  }, [handleStart]);
 
   // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Don't intercept shortcuts when confirmation modal is open
       if (showResetConfirmationRef.current) return;
 
+      // Ignore shortcuts if typing in input
       const tag = e.target?.tagName?.toUpperCase();
       if (
         tag === 'INPUT' ||
@@ -172,86 +187,83 @@ export default function App() {
 
       if (e.code === 'Space') {
         e.preventDefault();
-        if (isRunningRef.current) {
-          handlePause();
+        if (currentScreenRef.current === 'home') {
+          handleStartFromHome();
         } else {
-          handleStart();
+          if (isRunningRef.current) {
+            handlePause();
+          } else {
+            handleStart();
+          }
         }
       } else if (e.key === 'l' || e.key === 'L') {
-        e.preventDefault();
         if (isRunningRef.current) {
+          e.preventDefault();
           handleRecordLap();
         }
       } else if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        handleResetClick();
+        if (currentScreenRef.current === 'stopwatch') {
+          e.preventDefault();
+          handleResetClick();
+        }
+      } else if (e.key === 'Escape') {
+        if (currentScreenRef.current === 'laps') {
+          e.preventDefault();
+          handleNavigateStopwatch();
+        } else if (currentScreenRef.current === 'stopwatch' && !isRunningRef.current) {
+          e.preventDefault();
+          handleNavigateHome();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handlePause, handleStart, handleRecordLap, handleResetClick]);
+  }, [
+    handleStartFromHome,
+    handleStart,
+    handlePause,
+    handleRecordLap,
+    handleResetClick,
+    handleNavigateStopwatch,
+    handleNavigateHome,
+  ]);
 
   return (
-    <div className="editorial-app-root">
-      {/* Editorial Page Container */}
-      <div className="editorial-viewport-wrapper">
-        <Header onScrollToLaps={scrollToLaps} onScrollToTop={scrollToTop} />
+    <div className="stopwatch-app-root">
+      {/* Screen Router Viewport */}
+      <div className={`screen-view-framer view-${currentScreen}`}>
+        {currentScreen === 'home' && (
+          <HomeScreen onStartStopwatch={handleStartFromHome} />
+        )}
 
-        <main className="editorial-main-stage">
-          {/* 3-Phone Showcase Hero Composition */}
-          <div className="phones-trio-showcase">
-            {/* Left Phone — Intro / Welcome */}
-            <IntroPhone
-              onStartStopwatch={handleStart}
-              onViewLaps={scrollToLaps}
-              isRunning={isRunning}
-            />
+        {currentScreen === 'stopwatch' && (
+          <StopwatchScreen
+            elapsedTime={elapsedTime}
+            isRunning={isRunning}
+            isPaused={isPaused}
+            canReset={canReset}
+            laps={laps}
+            onStart={handleStart}
+            onPause={handlePause}
+            onReset={handleResetClick}
+            onRecordLap={handleRecordLap}
+            onNavigateHome={handleNavigateHome}
+            onNavigateLaps={handleNavigateLaps}
+          />
+        )}
 
-            {/* Center Phone — Hero Functional Stopwatch */}
-            <PhoneFrame
-              headerLabel="STOPWATCH"
-              variant="hero-center"
-              className="phone-center-hero"
-            >
-              <div className="center-hero-content">
-                <StopwatchDisplay
-                  elapsedTime={elapsedTime}
-                  isRunning={isRunning}
-                  isPaused={isPaused}
-                />
-                <StopwatchControls
-                  isRunning={isRunning}
-                  isPaused={isPaused}
-                  canReset={canReset}
-                  onStart={handleStart}
-                  onPause={handlePause}
-                  onReset={handleResetClick}
-                  onRecordLap={handleRecordLap}
-                  lapCount={laps.length}
-                />
-              </div>
-            </PhoneFrame>
-
-            {/* Right Phone — Active Lap Times */}
-            <ActivePhone
-              laps={laps}
-              isRunning={isRunning}
-              onPause={handlePause}
-              onStart={handleStart}
-              onRecordLap={handleRecordLap}
-              elapsedTime={elapsedTime}
-            />
-          </div>
-
-          {/* Minimalist Laps Section */}
-          <LapList laps={laps} onClearLaps={handleClearLaps} />
-        </main>
-
-        <KeyboardHints />
+        {currentScreen === 'laps' && (
+          <LapsScreen
+            laps={laps}
+            elapsedTime={elapsedTime}
+            onClearLaps={handleClearLaps}
+            onNavigateStopwatch={handleNavigateStopwatch}
+          />
+        )}
       </div>
 
-      {/* Inline Reset Confirmation Dialog */}
+      {/* Inline Reset Confirmation Modal */}
       <ResetConfirmation
         isOpen={showResetConfirmation}
         onCancel={handleCancelReset}

@@ -1,5 +1,5 @@
 # STOPWATCH WEB APPLICATION — INTERNSHIP TASK 02
-> **Screen-by-Screen Minimalist Application** &bull; HOME &rarr; STOPWATCH &rarr; LAPS
+> **Minimalist Editorial Stopwatch** &bull; HOME &rarr; STOPWATCH (with Side-by-Side Live Lap History)
 
 ![Stopwatch Task 02](https://img.shields.io/badge/Task-02-FFF000?style=flat-square&labelColor=111111)
 ![React 19](https://img.shields.io/badge/React-19-F5F5F5?style=flat-square&labelColor=111111)
@@ -8,39 +8,33 @@
 
 ---
 
-## 1. Application Flow & Architecture
-
-The application is engineered as a clean, screen-by-screen single-page application with dedicated views:
+## 1. Application Architecture & Desktop Layout
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                    SCREEN 1: HOME                      │
-│   • Editorial headline ("Measure time with precision")  │
-│   • Animated minimalist product illustration           │
-│   • Primary CTA: START STOPWATCH →                     │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                      START STOPWATCH
-                            ↓
-┌────────────────────────────────────────────────────────┐
-│                 SCREEN 2: STOPWATCH                    │
-│   • Top navigation: ← HOME                             │
-│   • 120–180px oversized thin timer (HH:MM:SS.CC)       │
-│   • Primary START / PAUSE / RESUME button (Yellow)     │
-│   • Secondary LAP & RESET buttons                      │
-│   • Navigation CTA: VIEW LAPS →                        │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                        VIEW LAPS
-                            ↓
-┌────────────────────────────────────────────────────────┐
-│               SCREEN 3: LAPS / RESULTS                 │
-│   • Top navigation: ← STOPWATCH                        │
-│   • Statistics grid: Total, Fastest, Slowest, Overall  │
-│   • Lap history table with fastest badges              │
-│   • Actions: ← BACK TO STOPWATCH, CLEAR LAPS           │
-└────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  ← HOME                         STOPWATCH       TASK 02     │
+│                                                             │
+│          STOPWATCH                    LAP HISTORY            │
+│        (60% - 65% width)            (35% - 40% width)        │
+│                                                             │
+│        00 : 00 : 00 . 00             LAP 04   00:09.31     │
+│                                       LAP 03   00:13.58     │
+│        ● READY                        LAP 02   00:08.42     │
+│                                       LAP 01   00:07.21     │
+│        ┌──────────────┐                                      │
+│        │    START     │               FASTEST   00:07.21     │
+│        └──────────────┘               SLOWEST   00:13.58     │
+│                                       TOTAL     04           │
+│          LAP       RESET                                     │
+│                                       CLEAR LAPS             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+- **Screen 1 (HOME)**: Fullscreen landing screen with typography ("*Measure time with precision*"), animated mechanical dial illustration, and `START STOPWATCH →` CTA.
+- **Screen 2 (STOPWATCH)**:
+  - **Left / Center (60–65%)**: Oversized thin typography timer (`HH : MM : SS . CC`), dynamic status badge (`READY`, `RUNNING`, `PAUSED`), and primary controls.
+  - **Right (35–40%)**: Live-updating Lap History sidebar with animated row insertion, dynamic `FASTEST` badge detection, session statistics, and inline `CLEAR LAPS` confirmation.
+- **Responsive Stacking**: Automatically stacks vertically on mobile devices (768px and below).
 
 ---
 
@@ -50,10 +44,10 @@ The application is engineered as a clean, screen-by-screen single-page applicati
 src/
 ├── components/
 │   ├── HomeScreen.jsx             # Screen 1: Editorial landing & animated dial
-│   ├── StopwatchScreen.jsx        # Screen 2: Central hero timer viewport
-│   ├── LapsScreen.jsx             # Screen 3: Laps, results & analytics grid
-│   ├── StopwatchDisplay.jsx       # 120-180px thin typography readout & status
-│   ├── StopwatchControls.jsx      # Touch-friendly primary & secondary buttons
+│   ├── StopwatchScreen.jsx        # Screen 2: 2-column side-by-side layout
+│   ├── StopwatchDisplay.jsx       # Oversized thin typography readout & status
+│   ├── StopwatchControls.jsx      # Primary yellow START & secondary LAP/RESET
+│   ├── LapHistoryPanel.jsx        # Right-side live lap list & analytics
 │   ├── StopwatchIllustration.jsx  # Precision animated vector product graphic
 │   └── ResetConfirmation.jsx      # Safe inline reset modal
 ├── utils/
@@ -77,12 +71,13 @@ src/
 
 ## 4. Keyboard Shortcuts
 
-| Shortcut | Action | Condition |
+| Shortcut | Context | Action |
 | :---: | :---: | :---: |
-| <kbd>SPACE</kbd> | **Start / Pause** (Toggle) | Launches timer on Home; controls stopwatch on timer view |
-| <kbd>L</kbd> | **Record Lap** | Active while timer is running |
-| <kbd>R</kbd> | **Reset** | Prompts confirmation if time/laps exist |
-| <kbd>ESC</kbd> | **Back / Dismiss** | Returns to previous screen or closes modal |
+| <kbd>ENTER</kbd> | **Home** | Navigates to Stopwatch screen **without starting** the timer |
+| <kbd>SPACE</kbd> | **Stopwatch** | Start / Pause toggle |
+| <kbd>L</kbd> | **Stopwatch** | Record lap (updates right-side panel live) |
+| <kbd>R</kbd> | **Stopwatch** | Prompt reset confirmation dialog |
+| <kbd>ESC</kbd> | **Stopwatch** | Return to Home screen (when timer is stopped) |
 
 ---
 

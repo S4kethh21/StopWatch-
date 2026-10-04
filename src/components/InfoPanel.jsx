@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, ArrowUpRight, ExternalLink } from 'lucide-react';
 
 function LinkedinIcon({ size = 15, className = '' }) {
@@ -64,6 +64,14 @@ function InstagramIcon({ size = 15, className = '' }) {
 }
 
 export default function InfoPanel({ isOpen, onClose }) {
+  const openTimeRef = useRef(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      openTimeRef.current = Date.now();
+    }
+  }, [isOpen]);
+
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -79,13 +87,21 @@ export default function InfoPanel({ isOpen, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  const handleBackdropClick = (e) => {
+    // Only close if clicked directly on backdrop (not child panel)
+    if (e.target !== e.currentTarget) return;
+    // Guard against ghost-clicks/event spillover within 250ms of opening
+    if (Date.now() - openTimeRef.current < 250) return;
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
       className="info-drawer-backdrop"
       role="presentation"
-      onClick={onClose}
+      onClick={handleBackdropClick}
     >
       <aside
         className="info-drawer-panel"
@@ -103,7 +119,10 @@ export default function InfoPanel({ isOpen, onClose }) {
           <button
             type="button"
             className="btn-drawer-close"
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             aria-label="Close information panel"
           >
             <X size={18} />

@@ -100,6 +100,8 @@ html, body {
    Shared Screen Headers & Circular Info Button
    ========================================================================== */
 .screen-header {
+  position: relative;
+  z-index: 50;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -185,16 +187,23 @@ html, body {
 
 /* Circular Info Button ⓘ */
 .btn-info-circle {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 50%;
   background: transparent;
   border: 1px solid var(--color-gray-border);
-  color: var(--color-gray-muted);
+  color: var(--color-white);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: manipulation;
+  position: relative;
+  z-index: 60;
   transition: all var(--transition-fast);
 }
 
@@ -207,6 +216,10 @@ html, body {
 
 .btn-info-circle:active {
   transform: translateY(0);
+}
+
+.btn-info-circle svg {
+  pointer-events: none;
 }
 
 .btn-back-nav {
@@ -1011,7 +1024,7 @@ html, body {
   background-color: rgba(5, 5, 5, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 2000;
+  z-index: 9999;
   display: flex;
   justify-content: flex-end;
   animation: fadeIn 200ms ease both;
@@ -1029,6 +1042,8 @@ html, body {
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.85);
   animation: drawerSlideIn 280ms var(--ease-out) both;
   overflow: hidden;
+  position: relative;
+  z-index: 10000;
 }
 
 @keyframes drawerSlideIn {

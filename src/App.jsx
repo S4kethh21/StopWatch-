@@ -177,9 +177,9 @@ export default function App() {
   // Keyboard Shortcuts Handler
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // If Info panel is open, let InfoPanel handle Escape
+      // If Info panel is open, let Escape or I key close it
       if (isInfoOpenRef.current) {
-        if (e.key === 'Escape') {
+        if (e.key === 'Escape' || e.key === 'i' || e.key === 'I') {
           e.preventDefault();
           handleCloseInfo();
         }
@@ -197,6 +197,13 @@ export default function App() {
         tag === 'SELECT' ||
         e.target?.isContentEditable
       ) {
+        return;
+      }
+
+      // 0. I KEY: Open Info / About Panel from any screen
+      if (e.key === 'i' || e.key === 'I') {
+        e.preventDefault();
+        handleOpenInfo();
         return;
       }
 

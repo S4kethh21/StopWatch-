@@ -1,8 +1,36 @@
 import React from 'react';
 import StopwatchIllustration from './StopwatchIllustration';
-import { ArrowRight, Info } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+
+function InfoGlyph({ size = 15 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ pointerEvents: 'none' }}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M12 10v9" />
+      <path d="M10 10h2" />
+      <path d="M9.5 19h5" />
+    </svg>
+  );
+}
 
 export default function HomeScreen({ onNavigateStopwatch, onOpenInfo }) {
+  const handleInfoClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpenInfo();
+  };
+
   return (
     <div className="screen-container home-screen-view">
       {/* Editorial Top Bar */}
@@ -22,11 +50,11 @@ export default function HomeScreen({ onNavigateStopwatch, onOpenInfo }) {
             <button
               type="button"
               className="btn-info-circle"
-              onClick={onOpenInfo}
+              onClick={handleInfoClick}
               aria-label="About this stopwatch and developer information"
-              title="About & Information"
+              title="About & Information (Press I)"
             >
-              <Info size={16} />
+              <InfoGlyph size={15} />
             </button>
           </div>
         </div>

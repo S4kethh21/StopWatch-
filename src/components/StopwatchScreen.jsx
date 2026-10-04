@@ -2,7 +2,29 @@ import React from 'react';
 import StopwatchDisplay from './StopwatchDisplay';
 import StopwatchControls from './StopwatchControls';
 import LapHistoryPanel from './LapHistoryPanel';
-import { ArrowLeft, Info } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+
+function InfoGlyph({ size = 15 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ pointerEvents: 'none' }}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M12 10v9" />
+      <path d="M10 10h2" />
+      <path d="M9.5 19h5" />
+    </svg>
+  );
+}
 
 export default function StopwatchScreen({
   elapsedTime,
@@ -18,6 +40,12 @@ export default function StopwatchScreen({
   onNavigateHome,
   onOpenInfo,
 }) {
+  const handleInfoClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpenInfo();
+  };
+
   return (
     <div className="screen-container stopwatch-screen-view">
       {/* Top Editorial Navigation */}
@@ -43,11 +71,11 @@ export default function StopwatchScreen({
             <button
               type="button"
               className="btn-info-circle"
-              onClick={onOpenInfo}
+              onClick={handleInfoClick}
               aria-label="About this stopwatch and developer information"
-              title="About & Information"
+              title="About & Information (Press I)"
             >
-              <Info size={16} />
+              <InfoGlyph size={15} />
             </button>
           </div>
         </div>

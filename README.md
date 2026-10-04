@@ -1,26 +1,22 @@
-# PULSE — Precision Stopwatch
-> **Internship Task 02** &bull; Precision Productivity & Performance Stopwatch Web Application
+# PRECISION STOPWATCH — INTERNSHIP TASK 02
+> **Minimalist Editorial Product Showcase** &bull; High-Contrast Precision Stopwatch Web Application
 
-![PULSE Stopwatch](https://img.shields.io/badge/Task-02-00d2ff?style=flat-square)
-![React 19](https://img.shields.io/badge/React-19-61dafb?style=flat-square)
-![Vite 8](https://img.shields.io/badge/Vite-8-646cff?style=flat-square)
-![Accuracy](https://img.shields.io/badge/Timer-performance.now()-10b981?style=flat-square)
+![Stopwatch Task 02](https://img.shields.io/badge/Task-02-FFF000?style=flat-square&labelColor=111111)
+![React 19](https://img.shields.io/badge/React-19-F5F5F5?style=flat-square&labelColor=111111)
+![Vite 8](https://img.shields.io/badge/Vite-8-777777?style=flat-square&labelColor=111111)
+![Accuracy](https://img.shields.io/badge/Accuracy-performance.now()-FFF000?style=flat-square&labelColor=111111)
 
 ---
 
-## 1. Overview & Identity
+## 1. Visual Direction & Design Language
 
-**PULSE** is a precision stopwatch web application engineered for optimal performance, responsiveness, and accuracy. Built with modern React and Vite, it delivers zero-drift timing using hardware timestamps (`performance.now()`) and smooth display rendering via `requestAnimationFrame`.
-
-### Key Highlights
-- **High-Precision Timing Engine**: Uses timestamp delta calculations (`performance.now()`) with accumulated segment tracking, guaranteeing zero drift over extended timing sessions.
-- **Microsecond / Centisecond Resolution**: Displays `HH:MM:SS.CC` (Hours, Minutes, Seconds, Centiseconds) in tabular monospace typography (`tabular-nums`) to prevent horizontal jitter.
-- **Full Lap Tracking System**: Records both individual lap splits and total cumulative elapsed time.
-- **Fastest & Slowest Lap Analytics**: Dynamically evaluates all recorded splits and provides visual badges and performance summary statistics.
-- **State-Driven Ambient Dial Animation**: An animated glowing instrument dial responds dynamically to stopwatch state (`RUNNING`, `PAUSED`, `READY`).
-- **Keyboard Shortcuts**: Full accessibility with Spacebar (Start/Pause), `L` (Lap), and `R` (Reset).
-- **Inline Modal Reset Confirmation**: Safe, pop-up-free dialog protecting against accidental resets without using browser `alert()` or `confirm()`.
-- **Edge-to-Edge Responsive Layout**: Fluid viewport design with `100svh`, tested from 320px mobile screens to 1920px+ ultra-wide desktop monitors.
+Designed with a high-contrast editorial aesthetic inspired by modern digital product case studies:
+- **Palette**: Deep charcoal canvas (`#111111`), secondary dark surface (`#171717`), bold neon yellow accent (`#FFF000`), crisp white (`#F5F5F5`), and muted gray (`#777777`).
+- **Typography**: Editorial typography using `Space Grotesk`, `Inter`, and `JetBrains Mono` with oversized thin numerical weights and high typographic hierarchy.
+- **3-Phone Mockup Showcase**:
+  - **Left Phone (Intro)**: Welcome screen with geometric stopwatch vector illustration, headline ("*Measure time of your Activities*"), and direct action triggers.
+  - **Center Phone (Hero Stopwatch)**: Primary interactive stopwatch with oversized stacked digits (`00h`, `59m`, `47s`, `.CC`), running indicator in `#FFF000`, and large yellow touch controls.
+  - **Right Phone (Active Times)**: Live split times feed, fastest lap highlighting in neon yellow, and synchronised action controls.
 
 ---
 
@@ -29,38 +25,46 @@
 ```
 src/
 ├── components/
-│   ├── Header.jsx              # Brand identity & internship metadata badge
-│   ├── StopwatchDisplay.jsx    # Tabular time readout, instrument ring & status pill
-│   ├── Controls.jsx            # Primary START, PAUSE, RESET buttons with state guards
-│   ├── LapControls.jsx         # LAP button with real-time lap count indicator
-│   ├── LapList.jsx             # Lap table, empty state, Clear Laps, and Fastest/Slowest stats
-│   ├── ResetConfirmation.jsx   # Accessible inline modal dialog with keyboard trap
-│   └── KeyboardHints.jsx       # Subtle footer displaying keyboard shortcuts
+│   ├── Header.jsx              # Editorial top bar with project metadata & navigation
+│   ├── PhoneFrame.jsx          # Reusable realistic smartphone mockup with hardware details
+│   ├── IntroPhone.jsx          # Left phone welcome screen with vector illustration
+│   ├── StopwatchDisplay.jsx    # Center phone stacked typography timer & status indicator
+│   ├── StopwatchControls.jsx   # Center phone yellow primary & dark outlined actions
+│   ├── ActivePhone.jsx         # Right phone active split times & live feed
+│   ├── LapList.jsx             # Minimalist lap history table & fastest/slowest analysis
+│   ├── ResetConfirmation.jsx   # Custom inline modal dialog with keyboard accessibility
+│   └── KeyboardHints.jsx       # Subtle keyboard shortcuts reference footer
 ├── utils/
-│   └── formatTime.js           # Pure time calculation & zero-padded string formatting
-├── App.jsx                     # Timing loop, state management, and shortcut listeners
-├── main.jsx                    # React root entry point
-└── index.css                   # Custom midnight/charcoal design system & animations
+│   └── formatTime.js           # High-precision time calculation & format helpers
+├── App.jsx                     # State management, timestamp loop, and keyboard listeners
+├── main.jsx                    # Application entry point
+└── index.css                   # Editorial design system (#111111 / #FFF000 / #F5F5F5)
 ```
 
 ---
 
-## 3. Keyboard Shortcuts
+## 3. High-Precision Timing Engine
 
-| Shortcut | Action | Condition |
-| :---: | :---: | :---: |
-| <kbd>SPACE</kbd> | **Start / Pause** (Toggle) | Always available (outside inputs) |
-| <kbd>L</kbd> | **Record Lap** | Active while timer is running |
-| <kbd>R</kbd> | **Reset** | Prompts confirmation if time/laps exist |
-| <kbd>ESC</kbd> | **Cancel Dialog** | Closes reset confirmation modal |
+- **Hardware Timestamps**: Calculates elapsed time using `performance.now()` deltas to guarantee zero drift:
+  $$\text{elapsed} = \text{accumulatedElapsed} + (\text{performance.now()} - \text{startTimestamp})$$
+- **Smooth Display Loops**: Uses `requestAnimationFrame` with single-loop execution guards.
+- **Format**: `HH:MM:SS.CC` with `tabular-nums` formatting to prevent horizontal shifting.
+- **Lap Tracking**: Accurate lap split calculation ($t_{\text{current}} - t_{\text{prev}}$) and total elapsed time tracking.
 
 ---
 
-## 4. Getting Started
+## 4. Keyboard Shortcuts
 
-### Prerequisites
-- Node.js (v18+ recommended)
-- npm or yarn
+| Key | Action | Details |
+| :---: | :---: | :---: |
+| <kbd>SPACE</kbd> | **Start / Pause** | Toggles stopwatch state (bypasses input fields) |
+| <kbd>L</kbd> | **Record Lap** | Active while timer is running |
+| <kbd>R</kbd> | **Reset** | Prompts inline confirmation dialog |
+| <kbd>ESC</kbd> | **Cancel** | Dismisses confirmation modal |
+
+---
+
+## 5. Development & Deployment
 
 ### Installation
 ```bash
@@ -81,16 +85,3 @@ npm run build
 ```bash
 npm run preview
 ```
-
----
-
-## 5. Quality & Compliance Checklist
-
-- [x] **Accurate Timing Engine**: `performance.now()` delta math with `requestAnimationFrame`.
-- [x] **Single Timing Loop**: Strict guard prevents duplicate loops on multiple Start clicks.
-- [x] **Format**: `HH:MM:SS.CC` with tabular figures (`font-variant-numeric: tabular-nums`).
-- [x] **Lap System**: Split time, Total time, Newest lap on top, Fastest & Slowest identification.
-- [x] **Reset Confirmation**: Custom accessible dialog without browser `alert`/`confirm`.
-- [x] **Micro-interactions**: Hover lifts, active returns, focus rings, disabled opacities.
-- [x] **Accessibility**: Semantic HTML, ARIA attributes, keyboard control, and `prefers-reduced-motion` support.
-- [x] **Zero Linter Warnings**: Verified with Oxlint.

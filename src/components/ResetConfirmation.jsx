@@ -1,13 +1,21 @@
 import React, { useEffect, useRef } from 'react';
-import { AlertCircle, X } from 'lucide-react';
+import { Bookmark, X } from 'lucide-react';
+import { formatTime, formatLapTime } from '../utils/formatTime';
 
-export default function ResetConfirmation({ isOpen, onCancel, onConfirm }) {
-  const cancelBtnRef = useRef(null);
+export default function ResetConfirmation({
+  isOpen,
+  elapsedTime = 0,
+  laps = [],
+  onCancel,
+  onDiscard,
+  onSaveAndReset,
+}) {
+  const saveBtnRef = useRef(null);
 
-  // Auto focus cancel button for safe keyboard UX
+  // Focus primary action button on open
   useEffect(() => {
-    if (isOpen && cancelBtnRef.current) {
-      cancelBtnRef.current.focus();
+    if (isOpen && saveBtnRef.current) {
+      saveBtnRef.current.focus();
     }
   }, [isOpen]);
 
@@ -28,6 +36,11 @@ export default function ResetConfirmation({ isOpen, onCancel, onConfirm }) {
 
   if (!isOpen) return null;
 
+  // Compute fastest lap if available
+  const fastestLap = laps.length > 0
+    ? laps.reduce((fastest, l) => (l.lapTime < fastest.lapTime ? l : fastest), laps[0])
+    : null;
+
   return (
     <div
       className="dialog-backdrop"
@@ -36,10 +49,10 @@ export default function ResetConfirmation({ isOpen, onCancel, onConfirm }) {
     >
       <div
         className="dialog-box-editorial"
-        role="alertdialog"
+        role="dialog"
         aria-modal="true"
-        aria-labelledby="reset-dialog-title"
-        aria-describedby="reset-dialog-desc"
+        aria-labelledby="save-dialog-title"
+        aria-describedby="save-dialog-desc"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -53,34 +66,61 @@ export default function ResetConfirmation({ isOpen, onCancel, onConfirm }) {
 
         <div className="dialog-content-wrap">
           <div className="dialog-badge-icon" aria-hidden="true">
-            <AlertCircle size={20} className="text-yellow" />
+            <Bookmark size={20} className="text-yellow" />
           </div>
 
           <div className="dialog-copy">
-            <h4 id="reset-dialog-title" className="dialog-title-editorial">
-              Reset stopwatch?
+            <span className="dialog-pretitle">STOPWATCH SESSION</span>
+            <h4 id="save-dialog-title" className="dialog-title-editorial">
+              SAVE SESSION?
             </h4>
-            <p id="reset-dialog-desc" className="dialog-desc-editorial">
-              This action will reset the elapsed time back to 00:00:00.00 and clear all recorded laps.
+            <p id="save-dialog-desc" className="dialog-desc-editorial">
+              Would you like to save this recorded session to Session History before resetting?
             </p>
+
+            {/* Quick Session Stats Preview */}
+            <div className="dialog-session-summary">
+              <div className="summary-stat">
+                <span className="summary-label">DURATION</span>
+                <span className="summary-val text-white">{formatTime(elapsedTime)}</span>
+              </div>
+              <div className="summary-stat">
+                <span className="summary-label">LAPS</span>
+                <span className="summary-val text-white">{String(laps.length).padStart(2, '0')}</span>
+              </div>
+              {fastestLap && (
+                <div className="summary-stat">
+                  <span className="summary-label">FASTEST</span>
+                  <span className="summary-val text-yellow">{formatLapTime(fastestLap.lapTime)}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* 3 Explicit Actions: SAVE | DISCARD | CANCEL */}
         <div className="dialog-btn-group">
           <button
-            ref={cancelBtnRef}
             type="button"
             className="btn-dialog-cancel-dark"
             onClick={onCancel}
           >
-            Cancel
+            CANCEL
           </button>
           <button
             type="button"
-            className="btn-dialog-confirm-yellow"
-            onClick={onConfirm}
+            className="btn-dialog-discard"
+            onClick={onDiscard}
           >
-            Reset
+            DISCARD
+          </button>
+          <button
+            ref={saveBtnRef}
+            type="button"
+            className="btn-dialog-confirm-yellow"
+            onClick={onSaveAndReset}
+          >
+            SAVE
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 /**
- * Accurate time formatting utilities for PULSE Precision Stopwatch
+ * Time formatting utilities for STOPWATCH Precision Time Tracking
  */
 
 /**
@@ -46,10 +46,69 @@ export function parseTimeParts(ms) {
 }
 
 /**
- * Formats milliseconds into HH:MM:SS.CC string
+ * Formats milliseconds into standard HH:MM:SS.CC string
  * @param {number} ms - Milliseconds
  * @returns {string} e.g. "00:00:00.00"
  */
 export function formatTime(ms) {
   return parseTimeParts(ms).formatted;
+}
+
+/**
+ * Formats milliseconds into concise lap time format
+ * e.g. "00:12.42" or "01:14:28.32" if hours > 0
+ * @param {number} ms - Milliseconds
+ * @returns {string}
+ */
+export function formatLapTime(ms) {
+  const parts = parseTimeParts(ms);
+  if (Number(parts.hours) > 0) {
+    return `${parts.hours}:${parts.minutes}:${parts.seconds}.${parts.centiseconds}`;
+  }
+  return `${parts.minutes}:${parts.seconds}.${parts.centiseconds}`;
+}
+
+/**
+ * Formats a timestamp into a human-readable session date label (e.g. "TODAY", "YESTERDAY", "OCT 07")
+ * @param {number|string|Date} timestamp
+ * @returns {{ group: string, fullDate: string, timeStr: string }}
+ */
+export function formatSessionDate(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+
+  const isToday =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday =
+    date.getDate() === yesterday.getDate() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getFullYear() === yesterday.getFullYear();
+
+  let group = '';
+  if (isToday) {
+    group = 'TODAY';
+  } else if (isYesterday) {
+    group = 'YESTERDAY';
+  } else {
+    group = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+  }
+
+  const timeStr = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  const fullDate = date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  return { group, fullDate, timeStr };
 }

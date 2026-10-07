@@ -1,47 +1,51 @@
 import React, { useState, useMemo } from 'react';
-import { Trash2, AlertTriangle, Zap } from 'lucide-react';
-import { formatTime } from '../utils/formatTime';
+import { Trash2, AlertTriangle, Zap, Award } from 'lucide-react';
+import { formatTime, formatLapTime } from '../utils/formatTime';
 
-export default function LapHistoryPanel({ laps, onClearLaps }) {
+export default function LapHistoryPanel({
+  laps = [],
+  elapsedTime = 0,
+  personalBest = null,
+  isNewPersonalBest = false,
+  onClearLaps,
+}) {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // Compute fastest & slowest laps dynamically
-  const { fastestLap, slowestLap, hasMultipleLaps, totalLapsCount } = useMemo(() => {
+  // Dynamic calculations: Fastest, Slowest, Average, Longest (for timeline bar)
+  const stats = useMemo(() => {
     if (!laps || laps.length === 0) {
       return {
         fastestLap: null,
         slowestLap: null,
-        hasMultipleLaps: false,
+        averageLapTime: 0,
+        longestLapTime: 0,
         totalLapsCount: 0,
-      };
-    }
-
-    if (laps.length === 1) {
-      return {
-        fastestLap: laps[0],
-        slowestLap: laps[0],
-        hasMultipleLaps: false,
-        totalLapsCount: 1,
+        totalLapTime: 0,
       };
     }
 
     let fastest = laps[0];
     let slowest = laps[0];
+    let sum = 0;
+    let longest = laps[0].lapTime;
 
-    for (let i = 1; i < laps.length; i++) {
-      if (laps[i].lapTime < fastest.lapTime) {
-        fastest = laps[i];
-      }
-      if (laps[i].lapTime > slowest.lapTime) {
-        slowest = laps[i];
-      }
+    for (let i = 0; i < laps.length; i++) {
+      const l = laps[i];
+      sum += l.lapTime;
+      if (l.lapTime < fastest.lapTime) fastest = l;
+      if (l.lapTime > slowest.lapTime) slowest = l;
+      if (l.lapTime > longest) longest = l.lapTime;
     }
+
+    const avg = sum / laps.length;
 
     return {
       fastestLap: fastest,
       slowestLap: slowest,
-      hasMultipleLaps: fastest.id !== slowest.id,
+      averageLapTime: avg,
+      longestLapTime: Math.max(longest, 1),
       totalLapsCount: laps.length,
+      totalLapTime: sum,
     };
   }, [laps]);
 
@@ -50,10 +54,11 @@ export default function LapHistoryPanel({ laps, onClearLaps }) {
     setShowClearConfirm(false);
   };
 
-  const hasLaps = totalLapsCount > 0;
+  const hasLaps = stats.totalLapsCount > 0;
+  const hasMultipleLaps = stats.totalLapsCount > 1;
 
   return (
-    <aside className="lap-history-panel" aria-label="Lap History">
+    <aside className="lap-history-panel" aria-label="Lap History and Session Statistics">
       {/* Panel Header */}
       <div className="lap-panel-header">
         <div className="panel-title-wrap">
@@ -61,39 +66,78 @@ export default function LapHistoryPanel({ laps, onClearLaps }) {
           <span className="panel-subtitle">RECORDED TIMES</span>
         </div>
         {hasLaps && (
-          <span className="panel-count-tag" aria-label={`${totalLapsCount} laps`}>
-            {String(totalLapsCount).padStart(2, '0')}
+          <span className="panel-count-tag" aria-label={`${stats.totalLapsCount} laps recorded`}>
+            {String(stats.totalLapsCount).padStart(2, '0')}
           </span>
         )}
       </div>
 
-      {/* Laps Content */}
+      {/* Personal Best Persistent Banner */}
+      {personalBest !== null && (
+        <div className={`personal-best-strip ${isNewPersonalBest ? 'strip-celebrate' : ''}`}>
+          <div className="pb-left">
+            <Award size={13} className="text-yellow" />
+            <span className="pb-label">
+              {isNewPersonalBest ? 'NEW PERSONAL BEST' : 'PERSONAL BEST'}
+            </span>
+          </div>
+          <span className="pb-value text-yellow">
+            {formatLapTime(personalBest)}
+          </span>
+        </div>
+      )}
+
+      {/* Laps List & Visual Timeline */}
       <div className="lap-panel-body">
         {hasLaps ? (
           <div className="lap-scroll-container">
             <div className="lap-list-vertical" role="list">
               {laps.map((lap) => {
-                const isFastest = hasMultipleLaps && lap.id === fastestLap?.id;
+                const isFastest = hasMultipleLaps && lap.id === stats.fastestLap?.id;
+                const isSlowest = hasMultipleLaps && lap.id === stats.slowestLap?.id;
+                
+                // Visual bar width relative to longest recorded lap
+                const barPercent = Math.min(
+                  100,
+                  Math.max(8, Math.round((lap.lapTime / stats.longestLapTime) * 100))
+                );
 
                 return (
                   <div
                     key={lap.id}
-                    className={`lap-item-row ${isFastest ? 'is-fastest-row' : ''}`}
+                    className={`lap-item-row ${isFastest ? 'is-fastest-row' : ''} ${
+                      isSlowest ? 'is-slowest-row' : ''
+                    }`}
                     role="listitem"
                   >
+                    {/* Lap Number & Badges */}
                     <div className="lap-row-left">
                       <span className="lap-label">
                         LAP {String(lap.lapNumber).padStart(2, '0')}
                       </span>
                       {isFastest && (
-                        <span className="badge-fastest-yellow" title="Fastest recorded lap">
+                        <span className="badge-fastest-yellow" title="Fastest session lap">
                           <Zap size={9} /> FASTEST
                         </span>
                       )}
                     </div>
+
+                    {/* Subtle Visual Timeline Bar */}
+                    <div className="lap-timeline-track" aria-hidden="true">
+                      <div
+                        className={`lap-timeline-bar ${isFastest ? 'bar-fastest' : ''}`}
+                        style={{ width: `${barPercent}%` }}
+                      />
+                    </div>
+
+                    {/* Formatted Lap Duration */}
                     <div className="lap-row-right">
-                      <span className={`lap-time-digits ${isFastest ? 'text-yellow' : ''}`}>
-                        {formatTime(lap.lapTime)}
+                      <span
+                        className={`lap-time-digits ${
+                          isFastest ? 'text-yellow' : isSlowest ? 'text-muted' : 'text-white'
+                        }`}
+                      >
+                        {formatLapTime(lap.lapTime)}
                       </span>
                     </div>
                   </div>
@@ -101,29 +145,48 @@ export default function LapHistoryPanel({ laps, onClearLaps }) {
               })}
             </div>
 
-            {/* Small Statistics Area below lap list */}
-            <div className="lap-stats-area">
-              <div className="stat-stat-item">
-                <span className="stat-metric-label">FASTEST</span>
-                <span className="stat-metric-value text-yellow">
-                  {fastestLap ? formatTime(fastestLap.lapTime) : '--:--:--.--'}
-                </span>
+            {/* Dynamic Session Statistics Block */}
+            <div className="session-statistics-module">
+              <div className="session-stats-header">
+                <span className="session-stats-pretitle">SESSION</span>
+                <span className="session-stats-title">STATISTICS</span>
               </div>
 
-              <div className="stat-stat-item">
-                <span className="stat-metric-label">SLOWEST</span>
-                <span className="stat-metric-value text-white">
-                  {slowestLap && hasMultipleLaps
-                    ? formatTime(slowestLap.lapTime)
-                    : (fastestLap ? formatTime(fastestLap.lapTime) : '--:--:--.--')}
-                </span>
-              </div>
+              <div className="session-stats-grid">
+                <div className="stat-stat-item">
+                  <span className="stat-metric-label">TOTAL LAPS</span>
+                  <span className="stat-metric-value text-white">
+                    {String(stats.totalLapsCount).padStart(2, '0')}
+                  </span>
+                </div>
 
-              <div className="stat-stat-item">
-                <span className="stat-metric-label">TOTAL LAPS</span>
-                <span className="stat-metric-value text-white">
-                  {String(totalLapsCount).padStart(2, '0')}
-                </span>
+                <div className="stat-stat-item">
+                  <span className="stat-metric-label">TOTAL TIME</span>
+                  <span className="stat-metric-value text-white">
+                    {formatTime(elapsedTime || stats.totalLapTime)}
+                  </span>
+                </div>
+
+                <div className="stat-stat-item">
+                  <span className="stat-metric-label">FASTEST</span>
+                  <span className="stat-metric-value text-yellow">
+                    {stats.fastestLap ? formatLapTime(stats.fastestLap.lapTime) : '--:--.--'}
+                  </span>
+                </div>
+
+                <div className="stat-stat-item">
+                  <span className="stat-metric-label">SLOWEST</span>
+                  <span className="stat-metric-value text-muted">
+                    {stats.slowestLap ? formatLapTime(stats.slowestLap.lapTime) : '--:--.--'}
+                  </span>
+                </div>
+
+                <div className="stat-stat-item stat-item-wide">
+                  <span className="stat-metric-label">AVERAGE</span>
+                  <span className="stat-metric-value text-white">
+                    {stats.averageLapTime > 0 ? formatLapTime(stats.averageLapTime) : '--:--.--'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -131,7 +194,7 @@ export default function LapHistoryPanel({ laps, onClearLaps }) {
           <div className="lap-empty-state">
             <p className="empty-state-title">No laps recorded yet.</p>
             <p className="empty-state-hint">
-              Start the stopwatch and press <kbd>L</kbd> or <span className="text-yellow">LAP</span> to record a time.
+              Start timing and press <kbd>L</kbd> or <span className="text-yellow">LAP</span> to record a split.
             </p>
           </div>
         )}
@@ -145,7 +208,7 @@ export default function LapHistoryPanel({ laps, onClearLaps }) {
               type="button"
               className="btn-clear-laps-action"
               onClick={() => setShowClearConfirm(true)}
-              aria-label="Clear recorded lap history"
+              aria-label="Clear recorded lap history without resetting stopwatch"
             >
               <Trash2 size={13} />
               <span>CLEAR LAPS</span>
@@ -154,7 +217,7 @@ export default function LapHistoryPanel({ laps, onClearLaps }) {
             <div className="inline-confirm-box" role="alert">
               <div className="confirm-prompt">
                 <AlertTriangle size={14} className="text-yellow" />
-                <span>CLEAR ALL LAPS?</span>
+                <span>CLEAR LAPS ONLY?</span>
               </div>
               <div className="confirm-btn-group">
                 <button

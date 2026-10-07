@@ -88,9 +88,7 @@ export default function InfoPanel({ isOpen, onClose }) {
   }, [isOpen, onClose]);
 
   const handleBackdropClick = (e) => {
-    // Only close if clicked directly on backdrop (not child panel)
     if (e.target !== e.currentTarget) return;
-    // Guard against ghost-clicks/event spillover within 250ms of opening
     if (Date.now() - openTimeRef.current < 250) return;
     onClose();
   };
@@ -136,8 +134,8 @@ export default function InfoPanel({ isOpen, onClose }) {
           <section className="drawer-section">
             <h3 className="section-label">ABOUT THIS WEB APP</h3>
             <p className="section-text">
-              A clean, precise stopwatch designed for simple time tracking,
-              lap recording and performance timing.
+              A simple precision stopwatch designed for accurate time tracking,
+              lap recording and session analysis.
             </p>
           </section>
 
@@ -145,14 +143,58 @@ export default function InfoPanel({ isOpen, onClose }) {
           <section className="drawer-section">
             <h3 className="section-label">FEATURES</h3>
             <ul className="features-list">
-              <li>Accurate stopwatch timing</li>
+              <li>Accurate timing</li>
               <li>Lap tracking</li>
-              <li>Fastest and slowest lap detection</li>
-              <li>Pause and resume</li>
+              <li>Session statistics</li>
+              <li>Personal best</li>
+              <li>Session history</li>
+              <li>Focus mode</li>
               <li>Keyboard shortcuts</li>
               <li>Responsive design</li>
-              <li>Minimal distraction-free interface</li>
             </ul>
+          </section>
+
+          {/* Section: Keyboard Shortcuts */}
+          <section className="drawer-section">
+            <h3 className="section-label">KEYBOARD SHORTCUTS</h3>
+            <div className="shortcuts-table">
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>ENTER</kbd></span>
+                <span className="shortcut-action">Enter Stopwatch (from Home)</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>SPACE</kbd></span>
+                <span className="shortcut-action">Start / Pause / Resume</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>L</kbd></span>
+                <span className="shortcut-action">Record Split Lap</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>R</kbd></span>
+                <span className="shortcut-action">Reset / Save Session</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>F</kbd></span>
+                <span className="shortcut-action">Toggle Focus Mode</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>H</kbd></span>
+                <span className="shortcut-action">Open Session History</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>S</kbd></span>
+                <span className="shortcut-action">Open Settings</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>I</kbd></span>
+                <span className="shortcut-action">Toggle About / Info</span>
+              </div>
+              <div className="shortcut-row">
+                <span className="shortcut-key"><kbd>ESC</kbd></span>
+                <span className="shortcut-action">Close Panels / Return</span>
+              </div>
+            </div>
           </section>
 
           {/* Section: Developer */}
@@ -163,20 +205,18 @@ export default function InfoPanel({ isOpen, onClose }) {
               I'm Sakheth Reddy, a Computer Science student interested in
               AI, creative technology and building useful digital experiences.
               I enjoy experimenting with AI-powered applications, interactive
-              web experiences and practical technology projects.
+              experiences and practical technology projects.
             </p>
           </section>
 
-          {/* Section: Explore My Work */}
+          {/* Section: My Portfolio */}
           <section className="drawer-section">
-            <h3 className="section-label">EXPLORE MY WORK</h3>
-            <span className="sub-section-title">PORTFOLIO</span>
+            <h3 className="section-label">MY PORTFOLIO</h3>
             <p className="section-text">
-              Visit my personal portfolio to explore my projects,
-              experiments and work.
+              Explore my projects, experiments and other work.
             </p>
             <a
-              href="https://sakethh.vercel.app"
+              href="https://saketh-portfolio-delta.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-portfolio-link"

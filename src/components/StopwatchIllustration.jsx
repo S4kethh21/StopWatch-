@@ -1,32 +1,32 @@
 import React from 'react';
 
+// Pre-compute 60 tick marks once at module load (eliminates render-time array allocations & trigonometry)
+const STATIC_TICKS = Array.from({ length: 60 }, (_, i) => {
+  const angle = i * 6;
+  const isMajor = i % 5 === 0;
+  const r1 = isMajor ? 122 : 128;
+  const r2 = 136;
+  const rad = (angle - 90) * (Math.PI / 180);
+  const x1 = +(150 + r1 * Math.cos(rad)).toFixed(2);
+  const y1 = +(150 + r1 * Math.sin(rad)).toFixed(2);
+  const x2 = +(150 + r2 * Math.cos(rad)).toFixed(2);
+  const y2 = +(150 + r2 * Math.sin(rad)).toFixed(2);
+
+  return (
+    <line
+      key={i}
+      x1={x1}
+      y1={y1}
+      x2={x2}
+      y2={y2}
+      stroke={isMajor ? '#FFF000' : '#333333'}
+      strokeWidth={isMajor ? 2 : 1}
+      strokeLinecap="round"
+    />
+  );
+});
+
 export default function StopwatchIllustration() {
-  // Generate 60 tick marks for an authentic high-precision dial
-  const ticks = Array.from({ length: 60 }, (_, i) => {
-    const angle = i * 6;
-    const isMajor = i % 5 === 0;
-    const r1 = isMajor ? 122 : 128;
-    const r2 = 136;
-    const rad = (angle - 90) * (Math.PI / 180);
-    const x1 = 150 + r1 * Math.cos(rad);
-    const y1 = 150 + r1 * Math.sin(rad);
-    const x2 = 150 + r2 * Math.cos(rad);
-    const y2 = 150 + r2 * Math.sin(rad);
-
-    return (
-      <line
-        key={i}
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke={isMajor ? '#FFF000' : '#333333'}
-        strokeWidth={isMajor ? 2 : 1}
-        strokeLinecap="round"
-      />
-    );
-  });
-
   return (
     <div className="home-graphic-wrapper" aria-hidden="true">
       <svg
@@ -54,7 +54,7 @@ export default function StopwatchIllustration() {
         <circle cx="150" cy="160" r="139" stroke="#1c1c1c" strokeWidth="1" fill="#101010" />
 
         {/* Tick Marks */}
-        {ticks}
+        {STATIC_TICKS}
 
         {/* Numerals for 60, 15, 30, 45 */}
         <text x="150" y="52" fill="#777777" fontSize="10" fontFamily="'Space Grotesk', sans-serif" fontWeight="700" textAnchor="middle">60</text>

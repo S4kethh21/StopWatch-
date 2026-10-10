@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Trash2, ChevronDown, ChevronUp, Zap, Clock, Calendar } from 'lucide-react';
+import { ArrowLeft, Trash2, ChevronDown, ChevronUp, Zap, Clock } from 'lucide-react';
 import { formatTime, formatLapTime, formatSessionDate } from '../utils/formatTime';
+import InfoGlyph from './InfoGlyph';
 
 export default function SessionHistoryView({
   sessions = [],
@@ -49,23 +50,7 @@ export default function SessionHistoryView({
             aria-label="About and Developer Information"
             title="About & Information (Press I)"
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ pointerEvents: 'none' }}
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
-              <path d="M12 10v9" />
-              <path d="M10 10h2" />
-              <path d="M9.5 19h5" />
-            </svg>
+            <InfoGlyph size={15} />
           </button>
         </div>
       </header>
